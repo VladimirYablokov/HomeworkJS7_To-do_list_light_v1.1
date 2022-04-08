@@ -3,32 +3,44 @@ const titleElem = formElem.title;
 const markElem = formElem.markup;
 const cardsElem = document.querySelector('.cards');
 
-const read = () => JSON.parse(localStorage.getItem('cards')) || [];
-const write = data => localStorage.setItem('cards', JSON.stringify(data));
-const cards = []
+let myCards = JSON.parse(localStorage.getItem("cards") ?? "[]");
 
-const resuldDoneElem = document.querySelector('#done');
-let done = localStorage.getItem('valueOfDone') || 0;
-resuldDoneElem.innerText = done;
+const resultDoneElem = document.querySelector('#done');
+let done = myCards.filter(card => card.done).length;
+resultDoneElem.innerText = done;
 
 const resuldCancelElem = document.querySelector('#canceled');
-let canceled = localStorage.getItem('valueOfCancel') || 0;
+let canceled = myCards.filter(card => card.canceled).length;
 resuldCancelElem.innerText = canceled;
+
+render();
 
 formElem.addEventListener('submit', event => {
 	event.preventDefault();
-	cards.push({
+	if (titleElem.value === "") {
+		return;
+	}
+	myCards.push({
 		title: titleElem.value,
-		markup: markElem.value
+		markup: markElem.value,
+		done: false,
+		canceled: false,
 	});
-	redner();
+	localStorage.setItem('cards', JSON.stringify(myCards));
+	render();
 });
 
-function redner() {
-	if (titleElem.value && markElem.value != ''){
+function render() {
+	titleElem.value = '';
+	markElem.value = '';
+	cardsElem.innerText = "";
+	for (let i = 0; i < myCards.length; i++) {
+		if (myCards[i].done || myCards[i].canceled) {
+			continue;
+		}
 		const card = document.createElement('div');
-		const cardTitleElem = document.createElement('div');
 		const cardTitleH2Elem = document.createElement('h2');
+		const cardTitleElem = document.createElement('div');
 		const cardMarkupH2Elem = document.createElement('h2');
 		const acceptBtnElem = document.createElement('div');
 		const cancelBtnElem = document.createElement('div');
@@ -42,26 +54,22 @@ function redner() {
 		acceptBtnElem.classList.add('acceptBtn');
 		cancelBtnElem.classList.add('cancelBtn');
 
-		cardTitleH2Elem.innerText = titleElem.value;
-		cardMarkupH2Elem.innerText = markElem.value;
-		write(cards);
-
+		cardTitleH2Elem.innerText = myCards[i].title;
+		cardMarkupH2Elem.innerText = myCards[i].markup;
 		acceptBtnElem.innerText = '✔️';
 		cancelBtnElem.innerText = '❌';
-		titleElem.value = '';
-		markElem.value = '';
 
-		acceptBtnElem.addEventListener('click', (event) => {
-			resuldDoneElem.innerText = ++done;
-			localStorage.setItem('valueOfDone', done);
+		acceptBtnElem.addEventListener('click', () => {
+			resultDoneElem.innerText = ++done;
+			myCards[i].done = true;
+			localStorage.setItem("cards", JSON.stringify(myCards));
 			card.remove();
 		});
-		cancelBtnElem.addEventListener('click', (event) => {
+		cancelBtnElem.addEventListener('click', () => {
 			resuldCancelElem.innerText = ++canceled;
-			localStorage.setItem('valueOfCancel', canceled);
+			myCards[i].canceled = true;
+			localStorage.setItem("cards", JSON.stringify(myCards));
 			card.remove();
 		});
-	}else{
-		alert('Заполните все поля ввода');
-	};
-};
+	}
+}
