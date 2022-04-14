@@ -33,7 +33,7 @@ formElem.addEventListener('submit', event => {
 function render() {
 	titleElem.value = '';
 	markElem.value = '';
-	cardsElem.innerText = "";
+	cardsElem.innerText = '';
 	for (let i = 0; i < myCards.length; i++) {
 		if (myCards[i].done || myCards[i].canceled) {
 			continue;
